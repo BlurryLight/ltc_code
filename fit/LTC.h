@@ -24,6 +24,7 @@ struct LTC {
 	mat3 M;
 	mat3 invM;
 	float detM;
+        float detInvM;
 
 	LTC()
 	{
@@ -40,27 +41,38 @@ struct LTC {
 
 	void update() // compute matrix from parameters
 	{
+          //注意glm是col major的
 		M = mat3(X, Y, Z) *
 			mat3(m11, 0, 0,
 				0, m22, 0,
 				m13, 0, 1);
 		invM = inverse(M);
 		detM = abs(glm::determinant(M));
+                detInvM = abs(glm::determinant(invM));
 	}
 
 	float eval(const vec3& L) const
 	{
-		vec3 Loriginal = normalize(invM * L);
-		vec3 L_ = M * Loriginal;
+                vec3 L_cosine = invM * L;
+                vec3 Loriginal = normalize(L_cosine);//回到cosine分布的方向
+                vec3 L_ = M * Loriginal;//再乘以m转到GGX方向，此时L_应该和L方向相同，只是有长度
 
 		float l = length(L_);
+                float l2 = length(L_cosine);
 		float Jacobian = detM / (l*l*l);
+                float Jacobian2 = detInvM / (l2 * l2 * l2);
 
-		float D = 1.0f / 3.14159f * glm::max<float>(0.0f, Loriginal.z); 
+		float D = 1.0f / 3.14159f * glm::max<float>(0.0f, Loriginal.z); //clamped cosine sample
 		
-		float res = magnitude * D / Jacobian;
+//		float res = magnitude * D / Jacobian;
+                float res = magnitude * D * Jacobian2;
 		return res;
 	}
+
+        //看起来似乎是cosine weigted sampling
+        // 不是
+        // 返回的是M * L
+        // 返回的是GGX分布的L
 
 	vec3 sample(const float U1, const float U2) const
 	{

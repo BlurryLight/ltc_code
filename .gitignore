@@ -45,3 +45,6 @@ Makefile
 bin
 obj
 out
+build
+*idea
+webgl/fit

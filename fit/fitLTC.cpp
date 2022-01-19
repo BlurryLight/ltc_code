@@ -82,6 +82,8 @@ float computeError(const LTC& ltc, const Brdf& brdf, const vec3& V, const float 
     for (int j = 0; j < Nsample; ++j)
     for (int i = 0; i < Nsample; ++i)
     {
+
+       //伪·蒙特卡洛方法
         const float U1 = (i + 0.5f)/Nsample;
         const float U2 = (j + 0.5f)/Nsample;
 
@@ -92,7 +94,7 @@ float computeError(const LTC& ltc, const Brdf& brdf, const vec3& V, const float 
 
             float pdf_brdf;
             float eval_brdf = brdf.eval(V, L, alpha, pdf_brdf);
-            float eval_ltc = ltc.eval(L);
+            float eval_ltc = ltc.eval(L);//里面算了magnitude,pdf这边要拿掉
             float pdf_ltc = eval_ltc/ltc.magnitude;
 
             // error with MIS weight
