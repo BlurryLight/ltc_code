@@ -451,6 +451,7 @@ vec3 LTC_Evaluate(
         sum = twoSided ? abs(vsum.z) : max(0.0, vsum.z);
 
         vec3 fetchDir = normalize(vsum);
+        //LL是带距离的
         colorMap = FetchDiffuseFilteredTexture(LL[0], LL[1], LL[2], LL[3], fetchDir);
     }
 
