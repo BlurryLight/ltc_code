@@ -406,8 +406,11 @@ function init() {
     g_array_slices_to_load = 8;
     g_array_data = new Float32Array(512 * 512 * 3 * 10);
 
+    //for (var i = 0; i < g_array_slices_to_load; i++) {
+    //    LoadTextureLevel(gl, "images/stained_glass_" + i + ".png", i, color_texture);
+    //}
     for (var i = 0; i < g_array_slices_to_load; i++) {
-        LoadTextureLevel(gl, "images/stained_glass_" + i + ".png", i, color_texture);
+        LoadTextureLevel(gl, "images/test_" + i + ".png", i, color_texture);
     }
 
     // Fetch media and kick off the main program once everything has loaded
