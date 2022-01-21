@@ -316,24 +316,39 @@ vec3 FetchDiffuseFilteredTexture(vec3 p1, vec3 p2, vec3 p3, vec3 p4, vec3 dir)
     // find tex coords of P
     float dot_V1_V2 = dot(V1, V2);
     float inv_dot_V1_V1 = 1.0 / dot(V1, V1);
-    vec3 V2_ = V2 - V1 * dot_V1_V2 * inv_dot_V1_V1;
+    vec3 V2_on_V1 = V1 * dot_V1_V2 * inv_dot_V1_V1;
+    vec3 V2_ = V2 - V2_on_V1;
+    vec3 V1_ = V1 + (V2 - V2_);
     vec2 Puv;
+    float v1_len = length(V1);
+    float v2_len = length(V2);
+
+    // vec3 e1 = normalize(V1);
+    // vec3 e2 = normalize(V2 - dot(V2,e1) * e1);
+    // Puv.y = 
     Puv.y = dot(V2_, P) / dot(V2_, V2_);
-    Puv.x = dot(V1, P)*inv_dot_V1_V1 - dot_V1_V2*inv_dot_V1_V1*Puv.y;
+    // Puv.x = dot(V1, P)*inv_dot_V1_V1 - dot_V1_V2*inv_dot_V1_V1*Puv.y;
+    // Puv.x = dot(V1, P)*inv_dot_V1_V1 - dot_V1_V2*inv_dot_V1_V1*Puv.y; //|V2|costheta * Puv.y / |V1|
+    Puv.x = dot(V1, P)*inv_dot_V1_V1 - dot(V2_on_V1,V1) * inv_dot_V1_V1 *Puv.y; //|V2|costheta * Puv.y / |V1|
 
     // LOD
     float d = abs(planeDist) / pow(planeAreaSquared, 0.25);
     
     // Flip texture to match OpenGL conventions
-    Puv = Puv*vec2(1, -1) + vec2(0, 1);
+    //y轴变成 1 - y,
+    // Puv = Puv*vec2(1, -1) + vec2(0, 1);
+    Puv.y = 1. - Puv.y;
     
-    float lod = log(2048.0*d)/log(3.0);
+    //这个看上去就是一个trick https://www.desmos.com/calculator/mncx4b6fvi
+    float lod = log(2048.0*d)/log(3.0);//log(2048 * d - 3) ? // 3.0是干啥来着
+    // float lod = log(128.0*d)/log(3.0);//log(2048 * d - 3) ? // 3.0是干啥来着
     lod = min(lod, 7.0);
     
     float lodA = floor(lod);
     float lodB = ceil(lod);
     float t = lod - lodA;
     
+    //不同的mipmap上线性插值
     vec3 a = FetchColorTexture(Puv, lodA);
     vec3 b = FetchColorTexture(Puv, lodB);
 
